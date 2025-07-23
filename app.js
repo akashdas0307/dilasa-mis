@@ -153,6 +153,12 @@ let appState = {
   currentView: 'desktop'
 };
 
+// Offline storage for field data
+let offlineData = {
+  activityUpdates: JSON.parse(localStorage.getItem('offlineActivityUpdates') || '[]'),
+  beneficiaries: JSON.parse(localStorage.getItem('offlineBeneficiaries') || '[]')
+};
+
 // Role-based permissions
 const rolePermissions = {
   project_administrator: ['all'],
@@ -258,7 +264,14 @@ function initializeEventListeners() {
   if (elements.fab) {
     elements.fab.addEventListener('click', showQuickActions);
   }
-  
+
+  // Online/offline handlers
+  window.addEventListener('online', handleOnlineStatus);
+  window.addEventListener('offline', handleOfflineStatus);
+
+  // Set initial offline indicator state
+  if (!navigator.onLine) handleOfflineStatus();
+
   console.log('Event listeners initialized');
 }
 
@@ -318,6 +331,36 @@ function performSearch() {
 function clearSearch() {
   if (elements.searchInput) elements.searchInput.value = '';
   toggleSearch();
+}
+
+// Handle offline/online state
+function handleOfflineStatus() {
+  appState.isOnline = false;
+  if (elements.offlineIndicator) elements.offlineIndicator.classList.remove('hidden');
+}
+
+function handleOnlineStatus() {
+  appState.isOnline = true;
+  if (elements.offlineIndicator) elements.offlineIndicator.classList.add('hidden');
+  syncOfflineData();
+}
+
+function syncOfflineData() {
+  if (!appState.isOnline) return;
+
+  offlineData.activityUpdates.forEach(data => {
+    console.log('Syncing activity update', data);
+    // Placeholder for real API call
+  });
+  offlineData.activityUpdates = [];
+  localStorage.removeItem('offlineActivityUpdates');
+
+  offlineData.beneficiaries.forEach(data => {
+    console.log('Syncing beneficiary', data);
+    // Placeholder for real API call
+  });
+  offlineData.beneficiaries = [];
+  localStorage.removeItem('offlineBeneficiaries');
 }
 
 // Notification management
@@ -1262,15 +1305,110 @@ function closeModal() {
 
 // Utility functions for demo
 function showDataCollectionForm() {
-  showModal('Data Collection', 'Mobile data collection form would open here in a real implementation', [
-    {text: 'Close', action: closeModal}
+  const myActivities = appData.activities.filter(a => a.assignedTo === session.user.name);
+  const options = myActivities.map(a => `<option value="${a.id}">${a.name}</option>`).join('');
+  const formHtml = `
+    <form id="dataCollectionForm">
+      <label>Activity</label>
+      <select name="activityId">${options}</select>
+      <label>Progress (%)</label>
+      <input type="number" name="progress" min="0" max="100" required>
+      <label>Notes</label>
+      <textarea name="notes"></textarea>
+      <label>Photo</label>
+      <input type="file" accept="image/*" capture="environment" name="photo">
+      <input type="hidden" name="lat">
+      <input type="hidden" name="lng">
+    </form>
+  `;
+  showModal('Data Collection', formHtml, [
+    {text: 'Save', action: submitDataCollectionForm, primary: true},
+    {text: 'Cancel', action: closeModal}
   ]);
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const form = document.getElementById('dataCollectionForm');
+      form.lat.value = pos.coords.latitude;
+      form.lng.value = pos.coords.longitude;
+    });
+  }
 }
 
 function showBeneficiaryForm() {
-  showModal('Beneficiary Registration', 'Beneficiary registration form would open here', [
-    {text: 'Close', action: closeModal}
+  const formHtml = `
+    <form id="beneficiaryForm">
+      <label>Name</label>
+      <input name="name" required>
+      <label>Village</label>
+      <input name="village" required>
+      <label>Age</label>
+      <input type="number" name="age" required>
+      <label>Category</label>
+      <input name="category">
+      <label>Photo</label>
+      <input type="file" accept="image/*" capture="environment" name="photo">
+      <input type="hidden" name="lat">
+      <input type="hidden" name="lng">
+    </form>
+  `;
+  showModal('Beneficiary Registration', formHtml, [
+    {text: 'Save', action: submitBeneficiaryForm, primary: true},
+    {text: 'Cancel', action: closeModal}
   ]);
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const form = document.getElementById('beneficiaryForm');
+      form.lat.value = pos.coords.latitude;
+      form.lng.value = pos.coords.longitude;
+    });
+  }
+}
+
+function submitDataCollectionForm() {
+  const form = document.getElementById('dataCollectionForm');
+  const data = {
+    activityId: parseInt(form.activityId.value, 10),
+    progress: parseInt(form.progress.value, 10),
+    notes: form.notes.value,
+    photo: form.photo.files[0] ? form.photo.files[0].name : null,
+    lat: form.lat.value,
+    lng: form.lng.value,
+    timestamp: new Date().toISOString(),
+    user: session.user ? session.user.name : ''
+  };
+
+  if (appState.isOnline) {
+    console.log('Submitting activity update', data);
+  } else {
+    offlineData.activityUpdates.push(data);
+    localStorage.setItem('offlineActivityUpdates', JSON.stringify(offlineData.activityUpdates));
+    alert('Saved offline. Will sync when online.');
+  }
+  closeModal();
+}
+
+function submitBeneficiaryForm() {
+  const form = document.getElementById('beneficiaryForm');
+  const data = {
+    name: form.name.value,
+    village: form.village.value,
+    age: parseInt(form.age.value, 10),
+    category: form.category.value,
+    photo: form.photo.files[0] ? form.photo.files[0].name : null,
+    lat: form.lat.value,
+    lng: form.lng.value,
+    timestamp: new Date().toISOString(),
+    user: session.user ? session.user.name : ''
+  };
+
+  if (appState.isOnline) {
+    console.log('Submitting beneficiary', data);
+  } else {
+    offlineData.beneficiaries.push(data);
+    localStorage.setItem('offlineBeneficiaries', JSON.stringify(offlineData.beneficiaries));
+    alert('Saved offline. Will sync when online.');
+  }
+  closeModal();
 }
 
 function showNewProjectForm() {
@@ -1314,3 +1452,5 @@ window.showDataCollectionForm = showDataCollectionForm;
 window.showBeneficiaryForm = showBeneficiaryForm;
 window.showNewProjectForm = showNewProjectForm;
 window.showQuickActions = showQuickActions;
+window.submitDataCollectionForm = submitDataCollectionForm;
+window.submitBeneficiaryForm = submitBeneficiaryForm;
