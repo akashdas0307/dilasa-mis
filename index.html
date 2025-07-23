@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dilasa PMIS - Project Management Information System</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta name="description" content="Dilasa NGO Project Management Information System for community development projects">
+</head>
+<body class="desktop">
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="header-content">
+            <div class="brand">
+                <div class="logo">🏗️</div>
+                <h1 class="brand-name">Dilasa PMIS</h1>
+                <span class="brand-tagline">Community Development</span>
+            </div>
+            
+            <div class="header-controls">
+                <div class="viewport-toggle">
+                    <button id="desktopToggle" class="toggle-btn active" aria-label="Desktop view">
+                        💻 Desktop
+                    </button>
+                    <button id="mobileToggle" class="toggle-btn" aria-label="Mobile view">
+                        📱 Mobile
+                    </button>
+                </div>
+                
+                <button id="searchToggle" class="btn btn--outline btn--sm" aria-label="Search">
+                    🔍 Search
+                </button>
+                
+                <button id="notificationToggle" class="btn btn--outline btn--sm notification-btn" aria-label="Notifications">
+                    🔔 <span class="notification-badge">3</span>
+                </button>
+                
+                <div class="user-menu" id="userMenu">
+                    <div class="user-avatar" id="userAvatar">👤</div>
+                    <div class="user-info">
+                        <span class="user-name" id="userName">Guest User</span>
+                        <span class="user-role" id="userRole">No Role</span>
+                    </div>
+                    <button id="logoutBtn" class="btn btn--secondary btn--sm" style="display: none;" onclick="logout()">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="breadcrumb" id="breadcrumb">
+            <span>Dashboard</span>
+        </nav>
+        
+        <!-- Search Bar (hidden by default) -->
+        <div class="search-bar hidden" id="searchBar">
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search projects, activities, beneficiaries...">
+                <div class="search-filters">
+                    <select class="form-control search-filter" id="searchFilter">
+                        <option value="all">All Items</option>
+                        <option value="projects">Projects</option>
+                        <option value="activities">Activities</option>
+                        <option value="beneficiaries">Beneficiaries</option>
+                        <option value="documents">Documents</option>
+                    </select>
+                </div>
+                <button class="btn btn--primary" id="searchBtn">Search</button>
+                <button class="btn btn--secondary" id="clearSearch">Clear</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">Navigation</h3>
+        </div>
+        <nav class="nav-menu" id="navMenu">
+            <!-- Navigation will be populated by JavaScript -->
+        </nav>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions" id="quickActions">
+            <h4 class="quick-actions-title">Quick Actions</h4>
+            <div class="quick-action-buttons">
+                <!-- Quick action buttons populated by JavaScript -->
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content" id="mainContent">
+        <div id="app">
+            <!-- Content will be rendered here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav" id="bottomNav">
+        <!-- Bottom navigation will be populated by JavaScript -->
+    </nav>
+
+    <!-- Floating Action Button (Mobile) -->
+    <button class="fab hidden" id="fab" aria-label="Quick action">
+        ➕
+    </button>
+
+    <!-- Modals -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal Title</h3>
+                <button id="modalClose" class="modal-close" aria-label="Close modal">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Modal content -->
+            </div>
+            <div class="modal-footer" id="modalFooter">
+                <!-- Modal actions -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Panel -->
+    <div id="notificationPanel" class="notification-panel hidden">
+        <div class="notification-header">
+            <h3>Notifications</h3>
+            <button id="markAllRead" class="btn btn--sm btn--outline">Mark All Read</button>
+        </div>
+        <div class="notification-list" id="notificationList">
+            <!-- Notifications will be populated here -->
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator hidden">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Offline Indicator -->
+    <div id="offlineIndicator" class="offline-indicator hidden">
+        <span>📵 Offline Mode</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
